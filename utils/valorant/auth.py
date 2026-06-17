@@ -351,6 +351,8 @@ class Auth:
         # pop cookie
         self._headers.pop('cookie')
 
+        print(f'[COOKIE DEBUG] status={r.status} location={r.headers.get("Location", "")[:120]} body={(await r.text())[:300]}')  # TEMP debug
+
         if r.status != 303:
             raise AuthenticationError(local_response.get('FAILED'))
 
