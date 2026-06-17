@@ -10,10 +10,12 @@ services:
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: python main.py
+    startCommand: python -u main.py
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.7
+      - key: PYTHONUNBUFFERED
+        value: "1"
       - key: DISCORD_TOKEN
         sync: false
       - key: OWNER_ID
