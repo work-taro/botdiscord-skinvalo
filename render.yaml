@@ -1,0 +1,20 @@
+# Render Blueprint — free Web Service for the Valorant Discord bot.
+# Docs: https://render.com/docs/blueprint-spec
+#
+# After connecting your GitHub repo to Render, set the secret env vars
+# (DISCORD_TOKEN, OWNER_ID) in the dashboard — they are intentionally NOT
+# stored here (sync: false) so secrets never live in the repo.
+services:
+  - type: web
+    name: valorant-discord-bot
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: DISCORD_TOKEN
+        sync: false
+      - key: OWNER_ID
+        sync: false

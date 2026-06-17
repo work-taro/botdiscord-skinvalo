@@ -96,6 +96,36 @@ class API_ENDPOINT:
             # return await self.fetch(endpoint=endpoint, url=url, errors=errors)
         return {}
 
+    def post(
+        self,
+        endpoint: str = '/',
+        url: str = 'pd',
+        body: dict[str, Any] | None = None,
+        errors: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """post data to the api and return the json response"""
+
+        self.locale_response()
+
+        endpoint_url = getattr(self, url)
+
+        data = None
+
+        r = requests.post(f'{endpoint_url}{endpoint}', headers=self.headers, json=body if body is not None else {})
+
+        try:  # noqa: SIM105
+            data = json.loads(r.text)
+        except Exception:
+            pass
+
+        if data is not None and 'httpStatus' not in data:
+            return data
+
+        if r.status_code == 400:
+            response = LocalErrorResponse('AUTH', self.locale_code)
+            raise ResponseError(response.get('COOKIES_EXPIRED'))
+        return {}
+
     def put(
         self,
         endpoint: str = '/',
@@ -178,16 +208,23 @@ class API_ENDPOINT:
     def store_fetch_offers(self) -> dict[str, Any]:
         """
         Store_GetOffers
-        Get prices for all store items
+        Get prices for the current daily store items.
+        NOTE: Riot removed the standalone GET /store/v1/offers/ endpoint (404).
+        Pricing now ships inside the v3 storefront under SingleItemStoreOffers,
+        so we derive it from there and keep the {'Offers': [...]} shape that
+        fetch_price() expects.
         """
-        return self.fetch('/store/v1/offers/', url='pd')
+        storefront = self.store_fetch_storefront()
+        offers = storefront.get('SkinsPanelLayout', {}).get('SingleItemStoreOffers', [])
+        return {'Offers': offers}
 
     def store_fetch_storefront(self) -> dict[str, Any]:
         """
-        Store_GetStorefrontV2
-        Get the currently available items in the store
+        Store_GetStorefrontV3
+        Get the currently available items in the store.
+        NOTE: v2 (GET) is gone (404); Riot now uses POST /store/v3/storefront/{puuid}.
         """
-        return self.fetch(f'/store/v2/storefront/{self.puuid}', url='pd')
+        return self.post(f'/store/v3/storefront/{self.puuid}', url='pd', body={})
 
     def store_fetch_wallet(self) -> dict[str, Any]:
         """

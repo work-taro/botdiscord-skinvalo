@@ -36,8 +36,10 @@ def InteractionLanguage(local_code: str) -> str:
 
 
 def local_read(filename: str) -> dict[str, Any]:
-    path = Path(__file__).parent.parent / 'languages' / f'{filename}.json'
+    path = Path(__file__).parent.parent.parent / 'languages' / f'{filename}.json'
     if not path.exists():
+        if filename == 'en-US':  # avoid infinite recursion if the fallback file is missing too
+            raise FileNotFoundError(f'Language file not found: {path}')
         return local_read('en-US')
 
     data: dict[str, Any] = json.loads(path.read_text(encoding='utf-8'))

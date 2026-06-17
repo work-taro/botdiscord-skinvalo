@@ -361,7 +361,9 @@ class Auth:
         for cookie in r.cookies.items():
             new_cookies['cookie'][cookie[0]] = str(cookie).split('=')[1].split(';')[0]
 
-        accessToken, tokenID = _extract_tokens_from_uri(await r.text())
+        # on a 303 the tokens live in the Location header (URL fragment), not the (empty) body
+        redirect_uri = r.headers.get('Location', '')
+        accessToken, tokenID = _extract_tokens_from_uri(redirect_uri)
         entitlements_token = await self.get_entitlements_token(accessToken)
 
         return {'cookies': new_cookies, 'AccessToken': accessToken, 'token_id': tokenID, 'emt': entitlements_token}

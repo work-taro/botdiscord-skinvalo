@@ -9,6 +9,9 @@ import aiohttp
 import discord
 from discord.ext import commands
 from discord.ext.commands import ExtensionFailed, ExtensionNotFound, NoEntryPointError
+from dotenv import load_dotenv
+
+load_dotenv()  # load DISCORD_TOKEN / OWNER_ID from .env file
 
 from utils import locale_v2
 from utils.valorant.cache import get_cache
@@ -53,7 +56,7 @@ class ValorantBot(commands.Bot):
 
         # bot presence
         activity_type = discord.ActivityType.listening
-        await self.change_presence(activity=discord.Activity(type=activity_type, name='(╯•﹏•╰)'))
+        await self.change_presence(activity=discord.Activity(type=activity_type, name='Dog Moo'))
 
     async def setup_hook(self) -> None:
         if self.session is None:
